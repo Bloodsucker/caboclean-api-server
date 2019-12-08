@@ -2,8 +2,10 @@
   "name": "caboclean-api-server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "tsc",
+    "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,5 +19,13 @@
     "url": "https://github.com/Bloodsucker/caboclean-api-server/issues"
   },
   "homepage": "https://github.com/Bloodsucker/caboclean-api-server#readme",
-  "dependencies": {}
+  "dependencies": {
+    "@types/express": "^4.17.2",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.14",
+    "ts-node": "^8.5.4",
+    "typescript": "^3.7.3"
+  }
 }
