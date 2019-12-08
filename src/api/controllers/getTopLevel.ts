@@ -1,5 +1,7 @@
-import { Request, Response } from 'express';
+import ExampleService from '../../services/ExampleService';
+import { Request, Response } from '../../util/serverTypes';
 
-export function getTopLevel(req: Request, res: Response) {
-    res.send('Top level rout!');
+export async function getTopLevel(req: Request, res: Response) {
+    let outputStr = await ExampleService.topLevelAction(req.app.locals.db.mongoDb);
+    res.send(outputStr);
 }

@@ -1,9 +1,10 @@
 import express = require('express');
 import api from './api';
 import Database from './Database'
+import { Application } from './util/serverTypes';
 
 export default class Server {
-    private app:express.Express;
+    private app:Application;
     private readonly port: number;
 
     public readonly db:Database;
@@ -22,7 +23,7 @@ export default class Server {
         await this.db.connect();
 
         return new Promise((resolve, reject) => {
-            this.app.listen(resolve);
+            this.app.listen(this.port, resolve);
         });
     }
 }
