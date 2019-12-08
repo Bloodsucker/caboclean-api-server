@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { topLevelRouter } from './routes'
+import * as routers from './routers'
 
 const api = Router();
 
-api.use('/', topLevelRouter);
+api.use('/', routers.topLevelRouter);
+api.use('/second', routers.secondLevelRouter);
 
 export default api;
