@@ -2,7 +2,7 @@ import express = require('express');
 import Database from '../Database';
 
 /**
- * Used to type certain server application data is present under the app.locals property such as the DB.
+ * Used to type certain request and server application data is present under the app.locals property such as the DB.
  * Controllers would extend this interface rather than express.Request.
  */
 export interface Request extends express.Request {
@@ -10,13 +10,13 @@ export interface Request extends express.Request {
 }
 
 export interface Application extends express.Application {
-    locals: ServerLocalProperties
+    locals: {db: Database}
 }
 
-interface ServerLocalProperties {
-    db:Database
-}
-
+/**
+ * Used to type certain response and server application data is present under the app.locals property such as the DB.
+ * Controllers would extend this interface rather than express.Request.
+ */
 export interface Response extends express.Response {
-
+    app:Application
 }
