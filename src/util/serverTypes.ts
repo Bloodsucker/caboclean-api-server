@@ -6,11 +6,11 @@ import Database from '../Database';
  * Controllers would extend this interface rather than express.Request.
  */
 export interface Request extends express.Request {
-    app:Application
+    app: Application;
 }
 
 export interface Application extends express.Application {
-    locals: {db: Database}
+    locals: {db: Database};
 }
 
 /**
@@ -18,5 +18,5 @@ export interface Application extends express.Application {
  * Controllers would extend this interface rather than express.Request.
  */
 export interface Response extends express.Response {
-    app:Application
+    app: Application;
 }

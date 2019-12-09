@@ -1,11 +1,9 @@
-import { MongoClient } from "mongodb";
-
 export default class ExampleService {
-    static async topLevelAction(mongodb:MongoClient /* more necessary arguments... */){
+    static topLevelAction(): string{
         return 'Top level action.';
     }
 
-    static async secondLevelAction(mongodb:MongoClient /* more necessary arguments... */) {
+    static secondLevelAction(): string {
         return 'Second level action.';
     }
 }

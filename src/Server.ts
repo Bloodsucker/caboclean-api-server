@@ -4,12 +4,12 @@ import Database from './Database'
 import { Application } from './util/serverTypes';
 
 export default class Server {
-    private app:Application;
+    private app: Application;
     private readonly port: number;
 
-    public readonly db:Database;
+    public readonly db: Database;
 
-    constructor(port:number) {
+    constructor(port: number) {
         this.app = express();
         this.port = port;
 
@@ -19,10 +19,10 @@ export default class Server {
         this.app.use('/api/v1', api);
     }
 
-    async start() {
+    async start(): Promise<void> {
         await this.db.connect();
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.app.listen(this.port, resolve);
         });
     }
