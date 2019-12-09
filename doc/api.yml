@@ -1,0 +1,26 @@
+openapi: '3.0.2'
+info:
+  title: API Title
+  version: '1.0'
+servers:
+  - url: https://localhost:8080/api/v1
+paths:
+  /:
+    get:
+      responses:
+        '200':
+          description: Example response for the top level API.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /second:
+    get:
+      description: Test path.
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
