@@ -13,7 +13,7 @@ export default class Server {
         this.app = express();
         this.port = port;
 
-        this.db = new Database('mongodb://localhost:27017');
+        this.db = new Database('localhost', 27017);
         this.app.locals.db = this.db;
 
         this.app.use('/api/v1', api);
