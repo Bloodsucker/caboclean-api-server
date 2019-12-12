@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import { getHome } from '../controllers/getHome';
+import { postHome } from '../controllers/postHome';
+import bodyParser = require('body-parser');
 
 export const HomeRouter = Router();
 
 HomeRouter
-    .route('/')
-    .get(getHome);
+    .post('/', bodyParser.json(), postHome)
+    .get('/:domain', getHome);
