@@ -1,14 +1,10 @@
 import { Request, Response } from "../../util/serverTypes";
 import HomeService from "../../services/HomeService";
-import HomeNotExistError from "../../errors/HomeNotExistError";
-import { ParamsDictionary } from "express-serve-static-core";
-
-interface GetHomeParams extends ParamsDictionary {
-    domain: string;
-}
+import HomeNotExistError from "../../errors/HomeNotFoundError";
+import { GetHomeParams } from "../routers";
 
 export async function getHome(req: Request<GetHomeParams>, res: Response): Promise<void> {
-    const homeDoc = await HomeService.getHome(req.params.domain);
+    const homeDoc = await HomeService.getHome(req.params.homeId);
 
     if(homeDoc instanceof HomeNotExistError) {
         res.sendStatus(404);

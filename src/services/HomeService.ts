@@ -1,12 +1,12 @@
 import Home, { HomeI } from "../model/Home";
-import HomeNotExistError from "../errors/HomeNotExistError";
+import HomeNotExistError from "../errors/HomeNotFoundError";
 import { Error } from "mongoose";
 
 export default class HomeService {
-    public static async getHome(domain: string): Promise<HomeI | HomeNotExistError>{
-        const home = await Home.findOne({domain: domain});
+    public static async getHome(homeId: string): Promise<HomeI | HomeNotExistError>{
+        const home = await Home.findById(homeId);
         
-        if(!home) return new HomeNotExistError();
+        if(!home) return new HomeNotExistError(homeId);
         
         return home;
     }
