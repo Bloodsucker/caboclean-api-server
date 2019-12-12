@@ -14,6 +14,9 @@ export default class Database {
     async connect(): Promise<void> {
         const connectionUrl = `mongodb://${this.host}:${this.port}/${Database.DB_NAME}`;
 
-        await mongoose.connect(connectionUrl);
+        await mongoose.connect(connectionUrl, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
     }
 }
