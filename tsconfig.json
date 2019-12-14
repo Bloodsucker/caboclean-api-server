@@ -5,5 +5,9 @@
         "moduleResolution": "Node",
         "outDir": "dist",
         "strict": true,
-    }
+        "inlineSourceMap": true,
+    },
+    "include": [
+        "src/"
+    ],
 }

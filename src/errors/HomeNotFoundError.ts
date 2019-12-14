@@ -1,6 +1,6 @@
-import NotExistError from "./NotExistError";
+import NotFoundError from "./NotFoundError";
 
-export default class HomeNotExist extends NotExistError {
+export default class HomeNotFoundError extends NotFoundError {
     constructor(homeId: string) {
         super(`Home ${homeId} not found`);
     }

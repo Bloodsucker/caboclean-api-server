@@ -10,7 +10,7 @@
         "plugin:@typescript-eslint/recommended-requiring-type-checking"
     ],
     "parserOptions": {
-        "project": "tsconfig.json"
+        "project": "tsconfig.eslint.json"
     },
     "rules": {
     }

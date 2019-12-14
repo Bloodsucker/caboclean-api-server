@@ -11,8 +11,12 @@ export interface HomeI extends Document {
     domain: string;
 }
 
-export interface HomeModelPublic {
+export interface NewHomePublicModel {
     domain: string;
+}
+
+export interface HomePublicModel extends NewHomePublicModel {
+    id: string;
 }
 
 export default model<HomeI>('Home', homeSchema);
