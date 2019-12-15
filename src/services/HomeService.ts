@@ -21,6 +21,7 @@ export default class HomeService {
         const newHome = new Home(newHomeSpec);
         
         try {
+            const newHome = new Home(newHomeSpec);
             await newHome.save();
         } catch(e) {
             if(e instanceof Error.ValidationError) return e;

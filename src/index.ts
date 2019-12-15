@@ -1,9 +1,10 @@
 import Server from './Server';
+import dotenv = require('dotenv');
 
-const SERVER_PORT = 8080;
+dotenv.config();
 
-const server = new Server(SERVER_PORT);
+const server = new Server();
 
 server.start().then(() => {
-    console.log( `Server is connected to DB and started at http://localhost:${ SERVER_PORT }` );
+    console.log( `Server is connected to DB and started at http://localhost:${ process.env['SERVER_API_PORT'] }` );
 });

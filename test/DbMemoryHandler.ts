@@ -18,6 +18,10 @@ export default class DbMemoryHandler {
         });
     }
 
+    async getConnectionString(): Promise<string> {
+        return await this.mongoMemoryServer.getConnectionString();
+    }
+
     async clearDb(): Promise<void> {
         await mongoose.connection.dropDatabase();
     }

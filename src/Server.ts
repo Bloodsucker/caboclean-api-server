@@ -3,17 +3,17 @@ import api from './api';
 import Database from './Database'
 import { Application } from './util/serverTypes';
 
+const SERVER_API_PORT_ENV = "SERVER_API_PORT";
+
 export default class Server {
-    private app: Application;
-    private readonly port: number;
+    public readonly app: Application;
 
     public readonly db: Database;
 
-    constructor(port: number) {
+    constructor() {
         this.app = express();
-        this.port = port;
 
-        this.db = new Database('localhost', 27017);
+        this.db = new Database();
         this.app.locals.db = this.db;
 
         this.app.use('/api/v1', api);
@@ -23,7 +23,7 @@ export default class Server {
         await this.db.connect();
 
         return new Promise((resolve) => {
-            this.app.listen(this.port, resolve);
+            this.app.listen(process.env[SERVER_API_PORT_ENV], resolve);
         });
     }
 }

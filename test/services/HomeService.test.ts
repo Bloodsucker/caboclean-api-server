@@ -22,9 +22,7 @@ describe('Creating new Homes', () => {
     });
 
     it('can\'t create invalid homes', async () => {
-        const invalidHomeSpec: object = {
-            invalidSpecification: "Invalid Spec"
-        };
+        const invalidHomeSpec: object = {};
 
         const newHome = await HomeService.createHome(invalidHomeSpec as NewHomePublicModel);
 
