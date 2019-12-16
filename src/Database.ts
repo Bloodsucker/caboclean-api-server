@@ -8,7 +8,8 @@ export default class Database {
 
         await mongoose.connect(connectionUrl, {
             useNewUrlParser: true,
-            useUnifiedTopology: true
+            useUnifiedTopology: true,
+            useFindAndModify: false
         });
     }
 }

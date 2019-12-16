@@ -1,44 +1,42 @@
-import Home, { HomeI, NewHomePublicModel, HomePublicModel } from "../model/Home";
+import { NewHomePublicDocument, HomePublicDocument, HomeModel } from "../model/Home";
 import HomeNotExistError from "../errors/HomeNotFoundError";
 import { Error } from "mongoose";
 import HomeNotFoundError from "../errors/HomeNotFoundError";
 
 export default class HomeService {
-    public static async getHome(homeId: string): Promise<HomeI | HomeNotExistError>{
+    public static async getHome(homeId: string): Promise<HomePublicDocument | HomeNotExistError>{
         try {
-            const home = await Home.findById(homeId);
+            const home = await HomeModel.findById(homeId);
         
             if(!home) return new HomeNotExistError(homeId);
 
-            return home;
+            return home.toJSON();
         } catch(e) {
             if(e instanceof Error.CastError) return new HomeNotFoundError(homeId);
             throw e;
         }
     }
 
-    public static async createHome(newHomeSpec: NewHomePublicModel): Promise<HomeI | Error.ValidationError> {
-        const newHome = new Home(newHomeSpec);
+    public static async createHome(newHomeSpec: NewHomePublicDocument): Promise<HomePublicDocument | Error.ValidationError> {
+        const newHome = new HomeModel(newHomeSpec);
         
         try {
-            const newHome = new Home(newHomeSpec);
             await newHome.save();
         } catch(e) {
             if(e instanceof Error.ValidationError) return e;
             throw e;
         }
 
-        return newHome
+        return newHome.toJSON();
     }
 
-    public static async putHome(updatedHomeSpec: HomePublicModel): Promise<Error.ValidationError | HomeNotExistError | void> {
+    public static async putHome(updatedHomeSpec: HomePublicDocument): Promise<Error.ValidationError | HomeNotExistError | void> {
         try {
-            const home = await HomeService.getHome(updatedHomeSpec.id);
+            const home = await HomeModel.findById(updatedHomeSpec.id);
 
-            if(home instanceof HomeNotExistError) return home;
+            if(!home) return new HomeNotExistError(updatedHomeSpec.id);
             
             home.overwrite(updatedHomeSpec);
-
             await home.save();
         } catch(e) {
             if(e instanceof Error.ValidationError) return e;

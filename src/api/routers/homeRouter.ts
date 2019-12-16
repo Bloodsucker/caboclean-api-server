@@ -14,4 +14,4 @@ export interface GetHomeParams extends ParamsDictionary {
 HomeRouter
     .post('/', bodyParser.json(), postHome)
     .get('/:homeId', getHome)
-    .put('/:homeId', putHome);
+    .put('/:homeId', bodyParser.json(), putHome);

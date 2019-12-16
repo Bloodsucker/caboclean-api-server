@@ -3,9 +3,7 @@ import Server from '../../src/Server';
 import dotenv = require('dotenv');
 import DbMemoryHandler from '../DbMemoryHandler';
 import { Types } from 'mongoose';
-import Home, { NewHomePublicModel, HomeI } from '../../src/model/Home';
-import { homedir } from 'os';
-import HomeService from '../../src/services/HomeService';
+import { HomeModel, NewHomePublicDocument, HomePublicDocument } from '../../src/model/Home';
 
 dotenv.config();
 
@@ -30,7 +28,7 @@ afterAll(async () => {
 describe('Route: /api/v1/homes', () => {
     describe('Home creation: POST /', () => {
         it('Create new home', async () => {
-            const newHome: NewHomePublicModel = {
+            const newHome: NewHomePublicDocument = {
                 domain: 'myHome'
             };
 
@@ -40,9 +38,11 @@ describe('Route: /api/v1/homes', () => {
     
             expect(res.status).toEqual(201);
             expect(res.type).toBe('application/json');
-            expect(res.body).toHaveProperty('_id');
-            expect(Types.ObjectId.isValid(res.body._id));
-            expect(res.body).toMatchObject(newHome);
+
+            expect(res.body).toHaveProperty('id');
+            const savedHome = await HomeModel.findById(res.body.id);
+            if(!savedHome) fail();
+            expect(res.body).toEqual(savedHome.toJSON());
         });
     
         it('Fails to create a new home if incomplete', async () => {
@@ -53,6 +53,7 @@ describe('Route: /api/v1/homes', () => {
                 });
     
             expect(res.status).toEqual(400);
+            expect(await HomeModel.countDocuments()).toBe(0);
         });
 
         it('Fails to create a new home with garbage id', async () => {
@@ -64,39 +65,31 @@ describe('Route: /api/v1/homes', () => {
                 });
     
             expect(res.status).toEqual(400);
+            expect(await HomeModel.countDocuments()).toBe(0);
         });
 
-        it('should ignore a passed valid id', async () => {
-            const newHome = {
-                _id: new Types.ObjectId()+'',
-                domain: "validDomain"
-            };
-
-            const res = await supertest(server.app)
-                .post('/api/v1/homes')
-                .send(newHome);
-            
-            expect(res.status).toEqual(400);
+        it('should ignore a passed valid id', () => {
+            fail('TODO decide what should happen'); // TODO
         });
     });
 
     describe('Home full update: PUT /:homeId', () => {
-        const storedHome: NewHomePublicModel = {
+        const storedHome: NewHomePublicDocument = {
             domain: 'myHome'
         };
 
-        let storedHomeModel: HomeI;
+        let storedHomeModel: HomePublicDocument;
         
         beforeEach(async () => {
-            storedHomeModel = await new Home(storedHome).save();
+            storedHomeModel = (await new HomeModel(storedHome).save()).toJSON();
         });
 
         afterEach(async () => {
-            await Home.findByIdAndRemove(storedHomeModel._id);
+            await HomeModel.findByIdAndRemove(storedHomeModel.id);
         });
 
         it('fully updates a home', async () => {
-            const updatedHome: NewHomePublicModel = Object.create(storedHome);
+            const updatedHome: HomePublicDocument = {...storedHomeModel};
             updatedHome.domain = "myUpdatedDomain";
 
             const res = await supertest(server.app)
@@ -106,8 +99,8 @@ describe('Route: /api/v1/homes', () => {
             expect(res.status).toBe(200);
         });
 
-        it('can\'t update an incomplete home', async () => {
-            const updatedHome: NewHomePublicModel = Object.create(storedHome);
+        it('fails to update an incomplete home', async () => {
+            const updatedHome: HomePublicDocument = {...storedHomeModel};
             delete updatedHome.domain;
 
             const res = await supertest(server.app)
@@ -117,51 +110,43 @@ describe('Route: /api/v1/homes', () => {
             expect(res.status).toBe(400);
         });
 
-        it('fails to update a home with garbage id', async () => {
-            const updatedHome: NewHomePublicModel = Object.create(storedHome);
-            delete updatedHome.domain;
-
-            const res = await supertest(server.app)
-                .put(`/api/v1/homes/${storedHomeModel.id}`)
-                .send(updatedHome);
-
-            expect(res.status).toBe(400);
+        it('fails to update a home with garbage id in URL', () => {
+            fail('TODO decide what to do.'); // TODO
         });
 
         it('fails to update a home with inconsistent id', () => {
-            expect(false).toBe(true); // TODO. Decide how to behave.
+            fail('TODO decide what to do.'); // TODO
         });
     });
 
     describe('Home get: GET /homeId', () => {
-        const storedHome: NewHomePublicModel = {
+        const storedHome: NewHomePublicDocument = {
             domain: 'myHome'
         };
 
-        let storedHomeModel: HomeI;
+        let storedHomeDocument: HomePublicDocument;
         
         beforeEach(async () => {
-            storedHomeModel = await new Home(storedHome).save();
+            storedHomeDocument = (await new HomeModel(storedHome).save()).toJSON();
         });
 
         afterEach(async () => {
-            await Home.findByIdAndRemove(storedHomeModel._id);
+            await HomeModel.findByIdAndRemove(storedHomeDocument.id);
         });
 
         it('gets a home', async () => {
             const res = await supertest(server.app)
-                .put(`/api/v1/homes/${storedHomeModel.id}`);
+                .get(`/api/v1/homes/${storedHomeDocument.id}`);
 
             expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('id', storedHomeModel.id);
-            expect(res.body).toMatchObject(storedHome);
+            expect(res.body).toEqual(storedHomeDocument);
         });
 
         it('fails to get a home that does\'t exist', async () => {
             const notFoundHomeId = new Types.ObjectId();
 
             const res = await supertest(server.app)
-                .put(`/api/v1/homes/${notFoundHomeId}`);
+                .get(`/api/v1/homes/${notFoundHomeId}`);
 
             expect(res.status).toBe(404);
         });
@@ -170,7 +155,7 @@ describe('Route: /api/v1/homes', () => {
             const garbageId = "garbageId";
 
             const res = await supertest(server.app)
-                .put(`/api/v1/homes/${garbageId}`);
+                .get(`/api/v1/homes/${garbageId}`);
 
             expect(res.status).toBe(404);
         });

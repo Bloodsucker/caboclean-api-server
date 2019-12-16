@@ -1,7 +1,7 @@
 import DbMemoryHandler from "../DbMemoryHandler";
 import HomeService from "../../src/services/HomeService";
-import Home, { NewHomePublicModel, HomePublicModel } from "../../src/model/Home";
-import { Model, Error } from "mongoose";
+import { NewHomePublicDocument, HomePublicDocument, HomeModel } from "../../src/model/Home";
+import { Error, Types } from "mongoose";
 import HomeNotFoundError from "../../src/errors/HomeNotFoundError";
 
 const dbHandler = new DbMemoryHandler();
@@ -12,56 +12,62 @@ afterAll(async () => await dbHandler.closeDb());
 
 describe('Creating new Homes', () => {
     it('creates a new home', async () => {
-        const newHomeSpec: NewHomePublicModel = {
+        const newHomeSpec: NewHomePublicDocument = {
             domain: 'myNewHome'
         };
         
         const newHome = await HomeService.createHome(newHomeSpec);
-
-        expect(newHome).toBeInstanceOf(Model);
+        if(newHome instanceof Error.ValidationError) fail();
+        
+        const home = await HomeModel.findById(newHome.id); 
+        if(!home) fail();
+        expect(newHome).toEqual(home.toJSON());
     });
 
     it('can\'t create invalid homes', async () => {
-        const invalidHomeSpec: object = {};
+        const invalidHomeSpec: Partial<NewHomePublicDocument> = {};
 
-        const newHome = await HomeService.createHome(invalidHomeSpec as NewHomePublicModel);
+        const newHome = await HomeService.createHome(invalidHomeSpec as NewHomePublicDocument);
 
         expect(newHome).toBeInstanceOf(Error.ValidationError);
     });
 
     it('creates new homes but without saving extra properties', async () => {
-        const newHomeSpec: object = {
+        const newHomeSpec: NewHomePublicDocument & {[key: string]: string} = {
             domain: 'myNewHome',
             ignoredProperty: "Ignored property"
         };
         
-        const newHome = await HomeService.createHome(newHomeSpec as NewHomePublicModel);
-
-        expect(newHome).toBeInstanceOf(Model);
+        const newHome = await HomeService.createHome(newHomeSpec);
+        if(newHome instanceof Error.ValidationError) fail();
+        
+        const home = await HomeModel.findById(newHome.id); 
+        if(!home) fail();
+        expect(newHome).toEqual(home.toJSON());
         expect(newHome).not.toHaveProperty('ignoredProperty');
     });
 });
 
 describe('Updating homes', () => {
-    const newHomeSpec: NewHomePublicModel = {
+    const newHomeSpec: NewHomePublicDocument = {
         domain: 'newHomeSpec'
     };
 
     let existingHomeId: string;
 
     beforeEach(async () => {
-        const newHome = new Home(newHomeSpec);
+        const newHome = new HomeModel(newHomeSpec);
         await newHome.save();
 
         existingHomeId = newHome.id;
     });
 
     afterEach(async () => {
-        await Home.findByIdAndRemove(existingHomeId);
+        await HomeModel.findByIdAndRemove(existingHomeId);
     });
 
     it('updates a existing home', async () => {
-        const updatedHomeSpec: HomePublicModel = {
+        const updatedHomeSpec: HomePublicDocument = {
             id: existingHomeId,
             domain: 'aDomain2'
         };
@@ -70,12 +76,13 @@ describe('Updating homes', () => {
         
         expect(err).toBeUndefined();
 
-        const updatedHome = await Home.findById(existingHomeId);
+        const updatedHome = await HomeModel.findById(existingHomeId);
+        if(!updatedHome) fail();
         expect(updatedHome).toMatchObject(updatedHomeSpec);
     });
 
-    it('cant update a non existing home with an ilegal Id', async () => {
-        const updatedHomeSpec: HomePublicModel = {
+    it('fails to update a non existing home with an ilegal Id', async () => {
+        const updatedHomeSpec: HomePublicDocument = {
             id: 'ilegalId',
             domain: 'aDomain'
         };
@@ -84,38 +91,40 @@ describe('Updating homes', () => {
 
         expect(err).toBeInstanceOf(HomeNotFoundError);
 
-        expect(await Home.countDocuments()).toBe(1);
+        expect(await HomeModel.countDocuments()).toBe(1);
     });
 
-    it('can\'t do partial updates', async () => {
-        const updatedHomeSpec: object = {
+    it('fails to do partial updates', async () => {
+        const updatedHomeSpec: Partial<HomePublicDocument> = {
             id: existingHomeId
         };
 
-        const err = await HomeService.putHome(updatedHomeSpec as HomePublicModel);
+        const err = await HomeService.putHome(updatedHomeSpec as HomePublicDocument);
         
         expect(err).toBeInstanceOf(Error.ValidationError);
-        const home = await Home.findById(existingHomeId);
-        expect(home).toHaveProperty('domain', newHomeSpec.domain);
+
+        const home = await HomeModel.findById(existingHomeId);
+        if(!home) fail();
+        expect(home.toJSON()).toMatchObject(newHomeSpec);
     });
 });
 
 describe('Getting new homes', () => {
-    const newHomeSpec: NewHomePublicModel = {
+    const newHomeSpec: NewHomePublicDocument = {
         domain: 'newHomeSpec'
     };
 
     let existingHomeId: string;
 
     beforeEach(async () => {
-        const newHome = new Home(newHomeSpec);
+        const newHome = new HomeModel(newHomeSpec);
         await newHome.save();
 
         existingHomeId = newHome.id;
     });
 
     afterEach(async () => {
-        await Home.findByIdAndRemove(existingHomeId);
+        await HomeModel.findByIdAndRemove(existingHomeId);
     });
 
     it('get an existing home', async () => {
@@ -123,7 +132,12 @@ describe('Getting new homes', () => {
         expect(foundHome).toMatchObject(newHomeSpec);
     });
 
-    it('don\' get home with an invalid Id', async () => {
+    it('fails to get an unexisting home with a valid Id', async () => {
+        const foundHome = await HomeService.getHome(new Types.ObjectId().toHexString());
+        expect(foundHome).toBeInstanceOf(HomeNotFoundError);
+    });
+
+    it('fails to get a home with a garbage Id', async () => {
         const foundHome = await HomeService.getHome('invalidId');
         expect(foundHome).toBeInstanceOf(HomeNotFoundError);
     });
