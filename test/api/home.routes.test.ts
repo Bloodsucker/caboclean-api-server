@@ -36,7 +36,7 @@ describe('Route: /api/v1/homes', () => {
                 .post('/api/v1/homes')
                 .send(newHome);
     
-            expect(res.status).toEqual(201);
+            expect(res.status).toBe(201);
             expect(res.type).toBe('application/json');
 
             expect(res.body).toHaveProperty('id');
@@ -52,7 +52,7 @@ describe('Route: /api/v1/homes', () => {
                     // Incomplete
                 });
     
-            expect(res.status).toEqual(400);
+            expect(res.status).toBe(400);
             expect(await HomeModel.countDocuments()).toBe(0);
         });
 
@@ -64,12 +64,20 @@ describe('Route: /api/v1/homes', () => {
                     domain: 'myHome'
                 });
     
-            expect(res.status).toEqual(400);
+            expect(res.status).toBe(400);
             expect(await HomeModel.countDocuments()).toBe(0);
         });
 
-        it('should ignore a passed valid id', () => {
-            fail('TODO decide what should happen'); // TODO
+        it('creates a new home when passed a valid id, but the id is ignored', async () => {
+            const newHome: NewHomePublicDocument & HomePublicDocument = {
+                id: new Types.ObjectId().toHexString(),
+                domain: 'myHome'
+            };
+            const res = await supertest(server.app)
+                .post('/api/v1/homes')
+                .send(newHome);
+    
+            expect(res.status).toBe(201);
         });
     });
 
